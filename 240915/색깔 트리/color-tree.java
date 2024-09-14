@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class Main {
-    static Map<Integer, Node> trees;
-    static List<Integer> rootLst;
+    static Map<Integer, Node> trees = new HashMap<>();
+    static List<Integer> rootLst = new ArrayList<>();
     static final int COLOR_CNT = 6;
 
     static class Node {
@@ -22,7 +22,7 @@ public class Main {
             this.pId = pId;
             this.color = color;
             this.maxDepth = maxDepth;
-            this.childs = new ArrayList();
+            this.childs = new ArrayList<>();
         }
     }
 
@@ -35,9 +35,6 @@ public class Main {
             this.visit = new boolean[COLOR_CNT];
         }
 
-        /*
-            색 추가
-        */
         public void updateVisit(boolean[] visit) {
             for(int i=0; i<COLOR_CNT; i++) {
                 if(this.visit[i]) {     
@@ -46,9 +43,6 @@ public class Main {
             }
         }
 
-        /*
-            가치의 제곱 계산
-        */
         public void calValue() {
             int tmp = 0;
             for(int i=0; i<COLOR_CNT; i++) {
@@ -65,19 +59,16 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st;
         int q = Integer.parseInt(br.readLine());      // 1 <= 명령의 수 <= 100,000
-        trees = new HashMap();
-        rootLst = new ArrayList();
 
-        // 명령의 정보가 주어짐
         for(int i=0; i<q; i++) {
             st = new StringTokenizer(br.readLine());
             int cmd = Integer.parseInt(st.nextToken());
 
             if(cmd == 100) {  // 노드 추가
-                int mId = Integer.parseInt(st.nextToken());     // 1 <= 고유한 번호 <= 100,000
-                int pId = Integer.parseInt(st.nextToken());     // 1 <= 부모 노드 번호 <= 100,000
-                int color = Integer.parseInt(st.nextToken());   // 1 <= 색깔 <= 5
-                int maxDepth = Integer.parseInt(st.nextToken());    // 1 <= 최대 깊이 <= 100
+                int mId = Integer.parseInt(st.nextToken());
+                int pId = Integer.parseInt(st.nextToken());
+                int color = Integer.parseInt(st.nextToken());
+                int maxDepth = Integer.parseInt(st.nextToken());
 
                 if(pId == -1) {     // 루트 노드일 때
                     trees.put(mId, new Node(mId, pId, color, maxDepth));
@@ -87,18 +78,17 @@ public class Main {
                     trees.get(pId).childs.add(mId);     // 부모 노드에 자식 노드 추가
                 }
             } else if(cmd == 200) {     // 색깔 변경
-                int mId = Integer.parseInt(st.nextToken());     // 루트
-                int color = Integer.parseInt(st.nextToken());   // 색깔
+                int mId = Integer.parseInt(st.nextToken());
+                int color = Integer.parseInt(st.nextToken());
 
                 changeColor(mId, color);
             } else if(cmd == 300) {     // 색깔 조회
-                int mId = Integer.parseInt(st.nextToken());     // 노드 번호
+                int mId = Integer.parseInt(st.nextToken());
 
                 bw.write(trees.get(mId).color + "\n");
             }
             else {  // 점수 조회
                 // 모든 노드의 가치를 계산하여, 가치 제곱의 합을 출력
-
                 int total = 0;
                 for(int id : rootLst) {
                     total += calDifferentColor(id).cnt;
@@ -111,20 +101,11 @@ public class Main {
         bw.flush();
     }
 
-    /*
-        부모 노드 pId에 노드를 더 추가할 수 있다면 true 반환
-    */
     private static boolean isAbleToAdd(int pId) {
         Node parent = trees.get(pId);
-        if(parent.childs.size() + 1 == parent.maxDepth) {      // 현재 자식을 최대로 가졌다면(자기 자신을 포함하니까 +1)
-            return false;
-        }
-        return true;
+        return parent.childs.size() < parent.maxDepth;
     }
 
-    /*
-        서브트리의 모든 노드의 색깔을 지정된 color로 변경
-    */
     private static void changeColor(int mId, int color) {
         Node node = trees.get(mId);
         node.color = color;
@@ -134,10 +115,6 @@ public class Main {
         }
     }
 
-    /*
-        모든 노드의 가치를 계산
-        mId: 현재 노드 번호
-    */
     private static NodeInfo calDifferentColor(int mId) {
         Node cur = trees.get(mId);
         NodeInfo nodeInfo = new NodeInfo();
