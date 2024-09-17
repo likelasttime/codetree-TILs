@@ -18,7 +18,7 @@ public class Main {
         List<Integer> childs;   // 자식 노드 번호를 저장하는 리스트
 
         Node() {
-            
+
         }
 
         Node(int mId, int pId, int color, int maxDepth, int lastUpdate) {
@@ -87,7 +87,7 @@ public class Main {
                 if(pId == -1) {     // 루트 노드일 때
                     trees[mId] = new Node(mId, pId, color, maxDepth, i);
                     rootLst.add(mId);
-                } else if(isAbleToAdd(pId)) {       // 부모 노드 pId에 자식을 추가할 수 있으면
+                } else if(isAbleToAdd(pId, 1)) {       // 부모 노드 pId에 자식을 추가할 수 있으면
                     trees[mId] = new Node(mId, pId, color, maxDepth, i);
                     trees[pId].childs.add(mId);
                 }
@@ -116,12 +116,15 @@ public class Main {
         bw.flush();
     }
 
-    private static boolean isAbleToAdd(int pId) {
-        Node parent = trees[pId];
-        if(parent.childs.size() + 1 == parent.maxDepth) {      // 현재 자식을 최대로 가졌다면(자기 자신을 포함하니까 +1)
+    private static boolean isAbleToAdd(int pId, int needDepth) {
+        if(pId == -1) {
+            return true;
+        }
+        
+        if(trees[pId].maxDepth <= needDepth) {
             return false;
         }
-        return true;
+        return isAbleToAdd(trees[pId].pId, needDepth + 1);
     }
 
     /*
