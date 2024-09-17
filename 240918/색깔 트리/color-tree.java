@@ -7,7 +7,7 @@ public class Main {
     static Node[] trees;
     static List<Integer> rootLst;       // 루트 노드를 저장하는 리스트
     static final int COLOR_CNT = 6;
-    static final int MAX_NODE_CNT = 100000;
+    static final int MAX_NODE_CNT = 100005;
 
     static class Node {
         int mId;        // 고유 번호
@@ -16,6 +16,10 @@ public class Main {
         int maxDepth;   // 서브트리의 최대 깊이
         int lastUpdate; // 노드를 추가하거나 색깔을 변경한 최근 시점
         List<Integer> childs;   // 자식 노드 번호를 저장하는 리스트
+
+        Node() {
+            
+        }
 
         Node(int mId, int pId, int color, int maxDepth, int lastUpdate) {
             this.mId = mId;
@@ -64,6 +68,10 @@ public class Main {
         int q = Integer.parseInt(br.readLine());      // 1 <= 명령의 수 <= 100,000
         trees = new Node[MAX_NODE_CNT];
         rootLst = new ArrayList();
+
+        for(int i=0; i<MAX_NODE_CNT; i++) {
+            trees[i] = new Node();
+        }
 
         // 명령의 정보가 주어짐
         for(int i=0; i<q; i++) {
