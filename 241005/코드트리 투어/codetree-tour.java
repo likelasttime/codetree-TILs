@@ -28,6 +28,8 @@ public class Main {
         }
     }
 
+    final static int MAX_ID = 30000;
+
     static StringTokenizer st;
     static int n;       // 정점의 갯수
     static int[][] arr;     // 인접 행렬
@@ -152,8 +154,8 @@ public class Main {
     public static void init(int n, int m) {
         arr = new int[n + 1][n + 1];
         dijkstraArr = new int[n + 1];
-        isCancel = new boolean[n + 1];
-        isCreated = new boolean[n + 1];
+        isCancel = new boolean[MAX_ID];
+        isCreated = new boolean[MAX_ID];
 
         // 인접 행렬 초기화
         for(int x=0; x<n; x++) {
