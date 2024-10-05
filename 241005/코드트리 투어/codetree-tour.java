@@ -28,7 +28,7 @@ public class Main {
         }
     }
 
-    final static int MAX_ID = 30000;
+    final static int MAX_ID = 30001;
 
     static StringTokenizer st;
     static int n;       // 정점의 갯수
