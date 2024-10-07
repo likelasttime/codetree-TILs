@@ -3,9 +3,9 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.Arrays;
@@ -36,9 +36,9 @@ public class Main {
     final static int MAX_D = 300;       // 도메인의 최대 갯수
     static final int MAX_N = 50000;     // 채점기의 최대 갯수
 
-    static Set[] isInReadyq = new HashSet[MAX_D + 1];   // 인덱스 = 도메인의 인덱스, 값 = 문제 ID 집합
+    static Set[] isInReadyq = new TreeSet[MAX_D + 1];   // 인덱스 = 도메인의 인덱스, 값 = 문제 ID 집합
     static PriorityQueue<Code>[] waitingPq = new PriorityQueue[MAX_D + 1];    // 채점 대기큐
-    static Map<String, Integer> domainToIdx = new HashMap();    // 도메인 : 인덱스
+    static Map<String, Integer> domainToIdx = new TreeMap();    // 도메인 : 인덱스
     static PriorityQueue<Integer> ableJudgeMachine = new PriorityQueue();       // 쉬고 있는 채점기
     static int[] judgingDomain = new int[MAX_N + 1];        // 값 = 채점하는 도메인 인덱스
     static int N;       // 채점기 갯수
@@ -102,7 +102,7 @@ public class Main {
 
         // 대기열 초기화
         for(int i=1; i<=MAX_D; i++) {
-            isInReadyq[i] = new HashSet();
+            isInReadyq[i] = new TreeSet();
         }
 
         // 우선순위 큐 배열 초기화
