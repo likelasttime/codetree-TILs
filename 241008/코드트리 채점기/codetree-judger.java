@@ -13,26 +13,23 @@ import java.util.Arrays;
 
 public class Main {
     static class Code implements Comparable<Code> {
-        int id;     // 인덱스
         int no;    // 문제 번호
         int t;      // 시간
         int p;      // 우선순위
-        String domain;  // 도메인
 
-        Code(int id, int t, int p, String domain, int no) {
-            this.id = id;
+        Code(int no, int t, int p) {
             this.t = t;
             this.p = p;
-            this.domain = domain;
             this.no = no;
         }
 
         @Override
         public int compareTo(Code c) {
-            if(c.p == this.p) {     // 우선순위가 같으면
-                return Integer.compare(this.p, c.p);    // 시간이 빠른 순
+            if(c.p != this.p) {     // 우선순위가 같지 않으면
+                return Integer.compare(this.p, c.p);       // 우선순위가 작은 순
             }
-            return Integer.compare(this.p, c.p);       // 우선순위가 작은 순
+            
+            return Integer.compare(this.t, c.t);    // 시간이 빠른 순
         }
     }
 
@@ -40,7 +37,7 @@ public class Main {
     static final int MAX_N = 50000;     // 채점기의 최대 갯수
 
     static Set[] isInReadyq = new HashSet[MAX_D + 1];   // 인덱스 = 도메인의 인덱스, 값 = 문제 ID 집합
-    static List<Code> waitingLst = new ArrayList();    // 채점 대기큐
+    static PriorityQueue<Code>[] waitingPq = new PriorityQueue[MAX_D + 1];    // 채점 대기큐
     static Map<String, Integer> domainToIdx = new HashMap();    // 도메인 : 인덱스
     static PriorityQueue<Integer> ableJudgeMachine = new PriorityQueue();       // 쉬고 있는 채점기
     static int[] judgingDomain = new int[MAX_N + 1];        // 값 = 채점하는 도메인 인덱스
@@ -49,6 +46,7 @@ public class Main {
     static int[] g = new int[MAX_D + 1];        // 도메인 별 시작 시각과 종료 시각 차이
     static int[] e = new int[MAX_D + 1];        // 도메인 별 s[i] + 3 × g[i]
     static int idx;     // 도메인 인덱스
+    static int answer;      // 채점 대기큐에 있는 값의 갯수
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -83,7 +81,7 @@ public class Main {
                 end(t, jId);
             } else if(cmd == 500) {     // 채점 대기 큐 조회
                 int t = Integer.parseInt(st.nextToken());   // 시간
-                bw.write(waitingLst.size() + "\n");
+                bw.write(answer + "\n");
             }
         }
         bw.flush();
@@ -108,6 +106,11 @@ public class Main {
         for(int i=1; i<=MAX_D; i++) {
             isInReadyq[i] = new HashSet();
         }
+
+        // 우선순위 큐 배열 초기화
+        for(int i=1; i<=MAX_D; i++) {
+            waitingPq[i] = new PriorityQueue();
+        }
         
         if(!domainToIdx.containsKey(domain)) {      // 처음 나온 도메인이라면
             idx++;      // 인덱스
@@ -116,7 +119,8 @@ public class Main {
 
         int domainIdx = domainToIdx.get(domain);        // 도메인의 인덱스
         isInReadyq[domainIdx].add(id);      // 도메인의 인덱스 값에 문제 ID를 저장
-        waitingLst.add(new Code(domainIdx, 0, 1, domain, id));
+        waitingPq[domainIdx].offer(new Code(id, 0, 1));
+        answer++;
     }
 
     /*
@@ -141,7 +145,8 @@ public class Main {
         }
 
         isInReadyq[domainIdx].add(id);      // 도메인 인덱스 값으로 문제 번호 추가
-        waitingLst.add(new Code(domainIdx, t, p, domain, id));      // 채점 대기큐에 객체 추가
+        waitingPq[domainIdx].offer(new Code(id, t, p));      // 채점 대기큐에 객체 추가
+        answer++;
     }
 
     /*
@@ -154,35 +159,36 @@ public class Main {
         }
 
         // 채점 대기 큐에서 즉시 채점이 가능하고 우선순위가 가장 높은 채점 task 고르기
-        String domain = "";
-        Collections.sort(waitingLst);       
         int minDomain = 0;      // 도메인 인덱스
-        int lstIdx = -1;        // 리스트에서 우선순위가 높은 task의 인덱스
-        Code minCode = new Code(Integer.MAX_VALUE, 0, 0, "", 0);
-        for(int i=0; i<waitingLst.size(); i++) {  
-            int curDomainId = domainToIdx.get(waitingLst.get(i).domain);  
-            if(e[curDomainId] > t) {  // 현재 채점중이거나 현재 시간에 이용할 수 없다면
+        Code minCode = new Code(0, 0, Integer.MAX_VALUE);
+        for(int i=1; i<=idx; i++) {      // 도메인 인덱스
+            if(e[i] > t) {  // 현재 채점중이거나 현재 시간에 이용할 수 없다면
                 continue;
-            } else {        // 채점 가능
-                minDomain = waitingLst.get(i).id;       // 도메인 인덱스 갱신
-                minCode = waitingLst.get(i);
-                lstIdx = i;
-                break;
             }
+
+            if(!waitingPq[i].isEmpty()) {   // i번 도메인에 url이 있다면
+                Code curCode = waitingPq[i].peek();
+
+                // 우선순위가 더 작거나 문제 번호가 같더라도 들어온 시각이 더 빠르다면
+                if(minCode.p > curCode.p || (minCode.no == curCode.no && minCode.t > curCode.t)) {
+                    minCode = curCode;
+                    minDomain = i;
+                }   
+            }       
         }
 
         // 우선순위가 가장 높은 url이 있으면 쉬고 있는 가장 낮은 번호의 채점기랑 연결
         if(minDomain > 0) {
             int judgerIdx = ableJudgeMachine.peek();
             ableJudgeMachine.poll();        
-
-            waitingLst.remove(lstIdx);      // 가장 우선순위가 높은 url 지우기
+            waitingPq[minDomain].poll();      // 가장 우선순위가 높은 url 지우기
 
             s[minDomain] = t;       // 채점 시작 시각 할당
             e[minDomain] = Integer.MAX_VALUE;   // 채점 종료 시각 할당(아직 언제 끝나는지 모름)
 
             judgingDomain[judgerIdx] = minDomain;       // 채점하고 있는 도메인 번호를 갱신
             isInReadyq[minDomain].remove(minCode.no);   // 대기열에서 해당 url의 문제 번호를 지우기
+            answer--;
         }
     }
 
