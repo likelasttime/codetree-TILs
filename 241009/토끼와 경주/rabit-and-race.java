@@ -56,8 +56,8 @@ public class Main {
     static int N;
     static int M;
     static int P;
-    static int totalScore;      // 공통으로 받은 점수
-    static int[] scores = new int[MAX_P + 1];   // 각 토끼마다 획득한 점수
+    static long totalScore;      // 공통으로 받은 점수
+    static long[] scores = new long[MAX_P + 1];   // 각 토끼마다 획득한 점수
     static int[] distances = new int[MAX_P + 1];    // 각 토끼마다 이동할 수 있는 거리
     static int[] jumpArr = new int[MAX_P + 1];   // 각 토끼마다 점프 횟수
     static int[] pIdArr = new int[MAX_P + 1];       // 인덱스: 입력으로 주어진 순서, 값: 토끼의 고유 번호
@@ -244,7 +244,7 @@ public class Main {
             jumpArr[pIdToIdxMap.get(nextRabbit.pId)]++;     // 점프 횟수 증가
 
             // 점수 부여 
-            scores[pIdToIdxMap.get(rabbit.pId)] -= (nextRabbit.position.x + nextRabbit.position.y);    // 점프한 토끼는 점수를 못 받음
+            scores[pIdToIdxMap.get(nextRabbit.pId)] -= (nextRabbit.position.x + nextRabbit.position.y);    // 점프한 토끼는 점수를 못 받음
             totalScore += (nextRabbit.position.x + nextRabbit.position.y);
         }
 
@@ -276,8 +276,8 @@ public class Main {
     /*
         최고의 토끼 선정
     */
-    public static int pickBestRabbit() {
-        int bestScore = 0;
+    public static long pickBestRabbit() {
+        long bestScore = 0;
         for(int p=0; p<P; p++) {
             bestScore = Math.max(bestScore, scores[p] + totalScore);
         }
