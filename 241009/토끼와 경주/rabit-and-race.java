@@ -241,6 +241,7 @@ public class Main {
             rabbitPq.offer(nextRabbit);     // 우선순위 큐에 추가
             positions[pIdToIdxMap.get(nextRabbit.pId)] = new Position(nextRabbit.position.x, nextRabbit.position.y);    // 위치 갱신
             pIdSet.add(nextRabbit.pId);    // 달린 토끼에 추가
+            jumpArr[pIdToIdxMap.get(nextRabbit.pId)]++;     // 점프 횟수 증가
 
             // 점수 부여 
             scores[pIdToIdxMap.get(rabbit.pId)] -= (nextRabbit.position.x + nextRabbit.position.y);    // 점프한 토끼는 점수를 못 받음
