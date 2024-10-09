@@ -34,7 +34,10 @@ public class Main {
         }
 
         int mSrcLastGift = deque[mSrc].getLast();       // mSrc 벨트에서 가장 마지막 선물의 번호
-        int mDstFirstGift = deque[mDst].getFirst();     // mDst 벨트에서 가장 첫 번째 선물의 번호
+        int mDstFirstGift = -1;
+        if(!deque[mDst].isEmpty()) {
+            mDstFirstGift = deque[mDst].getFirst();     // mDst 벨트에서 가장 첫 번째 선물의 번호
+        }
         Deque<Integer> tmp = new ArrayDeque();
 
         tmp.addAll(deque[mSrc]);
