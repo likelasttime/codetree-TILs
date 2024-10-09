@@ -74,20 +74,20 @@ public class Main {
             int gift = deque[mSrc].pollFirst();
             deque[mDst].addFirst(gift);     // mDst 벨트로 선물 옮기기
             
-            gifts[gift].left = -1;
-            if(gifts[gift].right != -1) {
+            if(gifts[gift].right != -1) {       // 옮길 선물의 뒤에 선물이 있으면
                 int right = gifts[gift].right;
                 gifts[right].left = -1;     // 선물을 옮겨서 그 뒤에 있던 선물이 가장 맨 앞으로 오게 됨
             }
+            gifts[gift].right = -1;
         } else if(!deque[mDst].isEmpty()) {       // mDst 벨트만 선물이 있다면
             int gift = deque[mDst].pollFirst();
             deque[mSrc].addFirst(gift);      // mSrc 벨트로 선물 옮기기
 
-            gifts[gift].left = -1;
-            if(gifts[gift].right != -1) {
+            if(gifts[gift].right != -1) {       // 옮길 선물의 뒤에 선물이 있으면
                 int right = gifts[gift].right;
                 gifts[right].left = -1;     // 선물을 옮겨서 그 뒤에 있던 선물이 가장 맨 앞으로 오게 됨
             }
+            gifts[gift].right = -1;
         }
 
         return deque[mDst].size();
