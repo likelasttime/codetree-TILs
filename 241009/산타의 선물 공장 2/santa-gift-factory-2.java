@@ -30,7 +30,7 @@ public class Main {
     */
     public static int moveAll(int mSrc, int mDst) {
         if(deque[mSrc].isEmpty()) {
-            return 0;
+            return deque[mDst].size();
         }
 
         int mSrcLastGift = deque[mSrc].getLast();       // mSrc 벨트에서 가장 마지막 선물의 번호
