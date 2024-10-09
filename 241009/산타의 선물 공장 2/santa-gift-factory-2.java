@@ -109,12 +109,17 @@ public class Main {
         }
 
         int mSrcGift = tmp.getLast();   // mSrc 벨트에서 가장 마지막 선물
-        int mDstGift = deque[mDst].getFirst();      // mDst 벨트에서 가장 첫 번째 선물
-        tmp.addAll(deque[mDst]);
+        int mDstGift = -1;
+        if(!deque[mDst].isEmpty()) {
+            mDstGift = deque[mDst].getFirst();      // mDst 벨트에서 가장 첫 번째 선물
+            tmp.addAll(deque[mDst]);
+        }
         deque[mDst] = tmp;
 
         gifts[mSrcGift].right = mDstGift;
-        gifts[mDstGift].left = mSrcGift;
+        if(mDstGift != -1) {
+            gifts[mDstGift].left = mSrcGift;
+        }
 
         return deque[mDst].size();
     } 
