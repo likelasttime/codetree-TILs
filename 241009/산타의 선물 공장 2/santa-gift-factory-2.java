@@ -47,8 +47,10 @@ public class Main {
 
         // mSrc 벨트에서 가장 마지막 선물의 오른쪽 값 = mDst 벨트에서 첫 번째 선물
         gifts[mSrcLastGift].right = mDstFirstGift;   
-        // mDst 벨트에서 첫 번째 선물의 왼쪽 값 = mSrc 벨트에서 마지막 선물   
-        gifts[mDstFirstGift].left = mSrcLastGift;
+        // mDst 벨트에서 첫 번째 선물의 왼쪽 값 = mSrc 벨트에서 마지막 선물  
+        if(mDstFirstGift != -1) { 
+            gifts[mDstFirstGift].left = mSrcLastGift;
+        }
         
         return deque[mDst].size();
     }
