@@ -126,6 +126,11 @@ public class Main {
             if(mDstGift != -1) {
                 gifts[mDstGift].left = mSrcGift;
             }
+
+            if(!deque[mSrc].isEmpty()) {
+                int mSrcFirst = deque[mSrc].getFirst();
+                gifts[mSrcFirst].left = -1;
+            }
         }
 
         return deque[mDst].size();
