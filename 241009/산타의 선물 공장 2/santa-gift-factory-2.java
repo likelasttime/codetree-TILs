@@ -113,17 +113,19 @@ public class Main {
             tmp.add(deque[mSrc].removeFirst());     // mSrc 벨트에서 가장 앞에 있는 선물부터 꺼내서 저장
         }
 
-        int mSrcGift = tmp.getLast();   // mSrc 벨트에서 가장 마지막 선물
-        int mDstGift = -1;
-        if(!deque[mDst].isEmpty()) {
-            mDstGift = deque[mDst].getFirst();      // mDst 벨트에서 가장 첫 번째 선물
-            tmp.addAll(deque[mDst]);
-        }
-        deque[mDst] = tmp;
+        if(!tmp.isEmpty()) {
+            int mSrcGift = tmp.getLast();   // mSrc 벨트에서 가장 마지막 선물
+            int mDstGift = -1;
+            if(!deque[mDst].isEmpty()) {
+                mDstGift = deque[mDst].getFirst();      // mDst 벨트에서 가장 첫 번째 선물
+                tmp.addAll(deque[mDst]);
+            }
+            deque[mDst] = tmp;
 
-        gifts[mSrcGift].right = mDstGift;
-        if(mDstGift != -1) {
-            gifts[mDstGift].left = mSrcGift;
+            gifts[mSrcGift].right = mDstGift;
+            if(mDstGift != -1) {
+                gifts[mDstGift].left = mSrcGift;
+            }
         }
 
         return deque[mDst].size();
