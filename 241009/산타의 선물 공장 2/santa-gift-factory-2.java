@@ -1,225 +1,237 @@
-import java.io.*;
-import java.util.StringTokenizer;
-import java.util.Deque;
-import java.util.ArrayDeque;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
-    static class Node {
-        int left;   // 왼쪽에 있는 선물 번호
-        int right;      // 오른쪽에 있는 선물 번호
+    public static final int MAX_M = 100000;
+    public static final int MAX_N = 100000;
 
-        Node(int left, int right) {
-            this.left = left;
-            this.right = right;
+    public static Scanner sc;
+
+    public static int n, m, q;      // 벨트의 갯수, 물건의 갯수, 명령의 수
+
+    // id에 해당하는 상자의 nxt 값과 prv 값을 관리
+    // 0이면 없다.
+    public static int[] prv = new int[MAX_M + 1];
+    public static int[] nxt = new int[MAX_M + 1];
+
+    // 각 벨트별로 head, tail id, 그리고 총 선물 수를 관리
+    public static int[] head = new int[MAX_N];
+    public static int[] tail = new int[MAX_N];
+    public static int[] numGift = new int[MAX_N];
+
+    /*
+        공장 설립
+    */
+    public static void buildFactory() {
+        // 공장 정보를 입력받기
+        n = sc.nextInt();   // 벨트의 갯수  
+        m = sc.nextInt();   // 물건의 갯수
+
+        // 벨트의 정보를 만들기
+        ArrayList<Integer>[] boxes = new ArrayList[n];
+        for(int i=0; i<n; i++) {
+            boxes[i] = new ArrayList<>();
+        }
+
+        for(int id=1; id<=m; id++) {   // 선물의 번호 
+            int bNum = sc.nextInt();    // 벨트 번호
+            bNum--;
+
+            boxes[bNum].add(id);    // bNum번 벨트에 id번 선물 추가
+        }
+
+        // 초기 벨트의 head, tail, nxt, prv 값을 설정
+        for(int i=0; i<n; i++) {        // 벨트 번호
+            // 비어있는 벨트라면 패스
+            if(boxes[i].size() == 0) {
+                continue;
+            }
+
+            // head, tail을 설정
+            head[i] = boxes[i].get(0);  // i번째 벨트에서 첫 번째 선물
+            tail[i] = boxes[i].get(boxes[i].size() - 1);    // i번째 벨트에서 마지막 선물
+
+            // 벨트 내 선물 총 수를 관리
+            numGift[i] = boxes[i].size();
+
+            // nxt, prv를 설정
+            for(int j=0; j<boxes[i].size()-1; j++) {
+                nxt[boxes[i].get(j)] = boxes[i].get(j + 1);     // 오른쪽 선물 저장
+                prv[boxes[i].get(j + 1)] = boxes[i].get(j);     // 왼쪽 선물 저장
+            }
         }
     }
 
-    final static int MAX_N = 100000;     // 최대 벨트 갯수
-    final static int MAX_M = 100000;     // 최대 선물 갯수
-
-    static int n;       // 밸트 갯수
-    static int m;       // 선물의 갯수
-    static Deque<Integer>[] deque = new ArrayDeque[MAX_N + 1];        // 벨트
-    static Node[] gifts = new Node[MAX_M + 1];      // 선물 배열
-
     /*
-        200: 물건 모두 옮기기
-        옮겨진 선물들은 mDst 벨트 앞에 위치한다.
-        mSrc 벨트에 선물이 존재하지 않는다면 아무것도 옮기지 않아도 된다.
-        옮긴 뒤에 mDst번째 벨트에 있는 선물들의 개수를 출력
+        물건을 전부 옮긴다.
     */
-    public static int moveAll(int mSrc, int mDst) {
-        if(deque[mSrc].isEmpty()) {
-            return deque[mDst].size();
+    public static void move() {
+        int mSrc = sc.nextInt();    
+        int mDst = sc.nextInt();
+        mSrc--; mDst--;
+
+        // mSrc에 물건이 없다면, 그대로 mDst내 물건 수가 답이 된다.
+        if(numGift[mSrc] == 0) {
+            System.out.println(numGift[mDst]);      // mDst 벨트에 있는 물건 수 출력
+            return;
         }
 
-        int mSrcLastGift = deque[mSrc].getLast();       // mSrc 벨트에서 가장 마지막 선물의 번호
-        int mDstFirstGift = -1;
-        if(!deque[mDst].isEmpty()) {
-            mDstFirstGift = deque[mDst].getFirst();     // mDst 벨트에서 가장 첫 번째 선물의 번호
+        // mDst에 물건이 없다면 그대로 옮겨주기
+        if(numGift[mDst] == 0) {
+            head[mDst] = head[mSrc]; // mDst 벨트의 맨 앞 선물 번호 = mSrc 벨트의 맨 앞 선물 번호
+            tail[mDst] = tail[mSrc]; // mDst 벨트의 맨 뒤 선물 번호 = mSrc 벨트의 맨 뒤 선물 번호
+        } else {    // mDst에 물건이 있다면
+            int origHead = head[mDst];  // mDst 벨트의 맨 앞 선물 번호
+            head[mDst] = head[mSrc];    // mDst의 head를 교체
+            // mSrc의 tail과 기존 mDst의 head를 연결
+            int srcTail = tail[mSrc];   
+            nxt[srcTail] = origHead;
+            prv[origHead] = srcTail;
         }
-        Deque<Integer> tmp = new ArrayDeque();
 
-        tmp.addAll(deque[mSrc]);
-        tmp.addAll(deque[mDst]);
-        deque[mDst] = tmp;
-        deque[mSrc].clear();        // mSrc 벨트에 있는 선물을 모두 없애기
+        // head, tail을 비워주기
+        head[mSrc] = tail[mSrc] = 0;
 
-        // mSrc 벨트에서 가장 마지막 선물의 오른쪽 값 = mDst 벨트에서 첫 번째 선물
-        gifts[mSrcLastGift].right = mDstFirstGift;   
-        // mDst 벨트에서 첫 번째 선물의 왼쪽 값 = mSrc 벨트에서 마지막 선물  
-        if(mDstFirstGift != -1) { 
-            gifts[mDstFirstGift].left = mSrcLastGift;
-        }
-        
-        return deque[mDst].size();
+        // 선물 상자 수를 갱신
+        numGift[mDst] += numGift[mSrc];
+        numGift[mSrc] = 0;  // mSrc 벨트에 있는 선물 상자 수를 초기화
+
+        System.out.println(numGift[mDst]);  
     }
 
     /*
-        300: 앞 물건만 교체
-        옮긴 뒤 m_dst의 선물의 총 수를 출력
-        둘 중 하나의 벨트에 선물이 아예 존재하지 않다면 교체하지 않고 해당 벨트로 선물을 옮기기
+        해당 벨트의 head를 제거
     */
-    public static int change(int mSrc, int mDst) {
-        if(deque[mSrc].isEmpty() && deque[mDst].isEmpty()) {      // 두 벨트 모두 선물이 없다면
+    public static int removeHead(int bNum) {
+        // 불가능하면 패스
+        if(numGift[bNum] == 0) {
             return 0;
-        } else if(!deque[mSrc].isEmpty() && !deque[mDst].isEmpty()) {   // 두 벨트 모두 선물이 있다면
-            int mSrcFront = deque[mSrc].pollFirst();    // mSrc 벨트에서 맨 앞에 있는 선물을 뽑기
-            int mDstFront = deque[mDst].pollFirst();    // mDst 벨트에서 맨 앞에 있는 선물을 뽑기
-            int tmp = 0;
-            
-            deque[mSrc].addFirst(mDstFront);        // mSrc 벨트 앞에 mDst에서 뽑은 선물을 추가
-            deque[mDst].addFirst(mSrcFront);        // mDst 벨트 앞에 mSrc에서 뽑은 선물을 추가
-
-            // 오른쪽 값을 교환
-            tmp = gifts[mSrcFront].right;
-            gifts[mSrcFront].right = gifts[mDstFront].right;
-            gifts[mDstFront].right = tmp;
-        } else if(!deque[mSrc].isEmpty()) {       // mSrc 벨트만 선물이 있다면
-            int gift = deque[mSrc].pollFirst();
-            deque[mDst].addFirst(gift);     // mDst 벨트로 선물 옮기기
-            
-            if(gifts[gift].right != -1) {       // 옮길 선물의 뒤에 선물이 있으면
-                int right = gifts[gift].right;
-                gifts[right].left = -1;     // 선물을 옮겨서 그 뒤에 있던 선물이 가장 맨 앞으로 오게 됨
-            }
-            gifts[gift].right = -1;
-        } else if(!deque[mDst].isEmpty()) {       // mDst 벨트만 선물이 있다면
-            int gift = deque[mDst].pollFirst();
-            deque[mSrc].addFirst(gift);      // mSrc 벨트로 선물 옮기기
-
-            if(gifts[gift].right != -1) {       // 옮길 선물의 뒤에 선물이 있으면
-                int right = gifts[gift].right;
-                gifts[right].left = -1;     // 선물을 옮겨서 그 뒤에 있던 선물이 가장 맨 앞으로 오게 됨
-            }
-            gifts[gift].right = -1;
         }
 
-        return deque[mDst].size();
+        // 노드가 1개라면 head, tail을 전부 삭제 후 반환
+        if(numGift[bNum] == 1) {
+            int id = head[bNum];    // bNum 벨트의 맨 앞 선물 번호
+            head[bNum] = tail[bNum] = 0;    // bNum 벨트에 있는 선물을 없애기
+            numGift[bNum] = 0;  // bNum 벨트에 있는 선물 수 초기화
+            return id;
+        }
+
+        // head를 바꿔주기
+        int hid = head[bNum];   // bNum 벨트의 맨 앞에 있는 선물 번호
+        int nextHead = nxt[hid];    // hid 선물의 왼쪽에 있는 선물 번호
+        nxt[hid] = prv[nextHead] = 0;   // hid의 오른쪽, nextHead의 왼쪽을 초기화
+        numGift[bNum]--;    // bNum번 선물의 수를 1 감소
+        head[bNum] = nextHead;  // bNum 벨트의 맨 앞 선물을 nextHead로 변경
+
+        return hid;
     }
 
     /*
-        400: 물건 나누기
-        mSrc번째 벨트에 있는 선물들의 개수를 n이라고 할 때,
-        가장 앞에서 floor(n / 2)번째까지 있는 선물을 mDst번째 벨트 앞으로 옮기기
-        진행 이후 mDst의 선물의 총 수를 출력
+        해당 벨트에 head를 추가
     */
-    public static int divide(int mSrc, int mDst) {
-        int n = deque[mSrc].size();     // mSrc번째 벨트에 있는 선물들의 개수
-        int moveCnt = (int)Math.floor(n / 2);        // 옮길 선물의 개수
-        Deque<Integer> tmp = new ArrayDeque();
-
-        while(moveCnt-- > 0) {
-            tmp.add(deque[mSrc].removeFirst());     // mSrc 벨트에서 가장 앞에 있는 선물부터 꺼내서 저장
+    public static void pushHead(int bNum, int hid) {
+        // 불가능한 경우는 진행하지 않는다.
+        if(hid == 0) {
+            return;
         }
 
-        if(!tmp.isEmpty()) {
-            int mSrcGift = tmp.getLast();   // mSrc 벨트에서 가장 마지막 선물
-            int mDstGift = -1;
-            if(!deque[mDst].isEmpty()) {
-                mDstGift = deque[mDst].getFirst();      // mDst 벨트에서 가장 첫 번째 선물
-                tmp.addAll(deque[mDst]);
-            }
-            deque[mDst] = tmp;
-
-            gifts[mSrcGift].right = mDstGift;
-            if(mDstGift != -1) {
-                gifts[mDstGift].left = mSrcGift;
-            }
-
-            if(!deque[mSrc].isEmpty()) {
-                int mSrcFirst = deque[mSrc].getFirst();
-                gifts[mSrcFirst].left = -1;
-            }
+        // 비어있었다면, head, tail이 동시에 추가됨
+        if(numGift[bNum] == 0) {
+            head[bNum] = tail[bNum] = hid;
+            numGift[bNum] = 1;
+        } else {    // 그렇지 않다면 head만 교체
+            int origHead = head[bNum];  // bNum 벨트에서 첫 번째 선물 번호
+            nxt[hid] = origHead;    // hid번 선물의 오른쪽 = origHead 선물
+            prv[origHead] = hid;    // origHead번 선물의 왼쪽 = hid 선물
+            head[bNum] = hid;   // bNum 벨트에 있는 첫 번째 선물 = hid 선물
+            numGift[bNum]++;    // bNum 벨트에 있는 선물 수 증가
         }
+    }
 
-        return deque[mDst].size();
-    } 
-
-    /*
-        (500) 선물 정보 얻기
+    /* 
+        앞 물건을 교체
     */
-    public static int getGiftInfo(int pNum) {
-        return gifts[pNum].left + 2 * gifts[pNum].right;
+    public static void change() {
+        int mSrc = sc.nextInt();
+        int mDst = sc.nextInt();
+        mSrc--; mDst--;
+
+        int srcHead = removeHead(mSrc);     // mSrc 벨트에서 맨 앞 선물 번호
+        int dstHead = removeHead(mDst);     // mDst 벨트에서 맨 앞 선물 번호
+        pushHead(mDst, srcHead);    // mDst 벨트의 앞에 srcHead 선물을 추가
+        pushHead(mSrc, dstHead);    // mSrc 벨트의 앞에 dstHead 선물을 추가
+
+        System.out.println(numGift[mDst]);
     }
 
     /*
-        (600) 벨트 정보 얻기
-        bNum: 벨트 번호
+        물건을 나눠 옮겨주기
     */
-    public static int getBeltInfo(int bNum) {
-        int a = -1;     // 맨 앞에 있는 선물의 번호
-        int b = -1;     // 맨 뒤에 있는 선물의 번호
-        int c = 0;      // 선물의 개수
+    public static void divide() {
+        int mSrc = sc.nextInt();
+        int mDst = sc.nextInt();
+        mSrc--; mDst--;
 
-        if(!deque[bNum].isEmpty()) {    // 벨트에 선물이 있다면
-            a = deque[bNum].getFirst();
-            b = deque[bNum].getLast();
-            c = deque[bNum].size();
+        // 순서대로 src에서 박스들을 빼주기
+        int cnt = numGift[mSrc];        // mSrc 벨트에 있는 선물의 수
+        ArrayList<Integer> boxIds = new ArrayList<>();
+        for(int i=0; i<cnt/2; i++) {
+            boxIds.add(removeHead(mSrc));   // mSrc 벨트에서 맨 앞 선물을 꺼내서 리스트에 저장
         }
 
-        return a + 2 * b + 3 * c;
+        // 거꾸로 뒤집어서 하나씩 dst에 박스들을 넣어주기
+        for(int i=boxIds.size()-1; i>=0; i--) {
+            pushHead(mDst, boxIds.get(i));  // mDst 벨트에 선물 추가
+        }
+
+        System.out.println(numGift[mDst]);
     }
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        StringTokenizer st;
-        int q = Integer.parseInt(br.readLine());        // 명령의 수
+    /*
+        선물 점수를 얻는다.
+    */
+    public static void giftScore() {
+        int pNum = sc.nextInt();
 
+        int a = prv[pNum] != 0 ? prv[pNum] : -1;    // pNum 선물의 왼쪽 선물 번호
+        int b = nxt[pNum] != 0 ? nxt[pNum] : -1;    // pNum 선물의 오른쪽 선물 번호
+
+        System.out.println(a + 2 * b);
+    }
+
+    /*
+        벨트 정보를 얻기
+    */
+    public static void beltScore() {
+        int bNum = sc.nextInt();
+        bNum--;
+
+        int a = head[bNum] != 0 ? head[bNum] : -1;  // bNum번 벨트에서 맨앞 선물 번호
+        int b = tail[bNum] != 0 ? tail[bNum] : -1;  // bNum번 벨트에서 맨뒤 선물 번호
+        int c = numGift[bNum];  // bNum번 벨트에 있는 총 선물 수
+
+        System.out.println(a + 2 * b + 3 * c);
+    }
+
+    public static void main(String[] args) {
+        sc = new Scanner(System.in);
+        q = sc.nextInt();   // 명령 수
         while(q-- > 0) {
-            st = new StringTokenizer(br.readLine());
-            int cmd = Integer.parseInt(st.nextToken());     // 명령어
-
-            if(cmd == 100) {        // 공장 설립
-                n = Integer.parseInt(st.nextToken());     // 벨트 갯수
-                m = Integer.parseInt(st.nextToken());     // 선물 갯수
-
-                // 벨트 초기화
-                for(int i=1; i<=n; i++) {
-                    deque[i] = new ArrayDeque();
-                }
-
-                // 선물 초기화
-                for(int i=1; i<=m; i++) {
-                    gifts[i] = new Node(-1, -1);
-                }
-
-                // 벨트에 선물 넣기
-                for(int gift=1; gift<=m; gift++) {
-                    int bNum = Integer.parseInt(st.nextToken());    // 벨트 번호
-                    if(!deque[bNum].isEmpty()) {    // 벨트에 선물이 있으면
-                        int lastGift = deque[bNum].getLast();       // 현재 벨트에 있는 가장 마지막 선물
-                        gifts[gift].left = lastGift;    // 앞에 있는 선물 번호 저장 
-                        gifts[lastGift].right = gift;   // 앞에 있는 선물의 오른쪽 선물 번호를 갱신
-                    }
-                    deque[bNum].add(gift);      // 벨트에 선물 추가
-                }
-            } else if(cmd == 200) {     // 물건 모두 옮기기
-                int mSrc = Integer.parseInt(st.nextToken());
-                int mDst = Integer.parseInt(st.nextToken());
-
-                bw.write(moveAll(mSrc, mDst) + "\n");
-            } else if(cmd == 300) {     // 앞 물건만 교체하기
-                int mSrc = Integer.parseInt(st.nextToken());
-                int mDst = Integer.parseInt(st.nextToken());
-
-                bw.write(change(mSrc, mDst) + "\n");
-            } else if(cmd == 400) {     // 물건 나누기
-                int mSrc = Integer.parseInt(st.nextToken());
-                int mDst = Integer.parseInt(st.nextToken());
-
-                bw.write(divide(mSrc, mDst) + "\n");
-            } else if(cmd == 500) {     // 선물 정보 얻기
-                int pNum = Integer.parseInt(st.nextToken());
-
-                bw.write(getGiftInfo(pNum) + "\n");
-            } else if(cmd == 600) {     // 벨트 정보 얻기
-                int pNum = Integer.parseInt(st.nextToken());
-
-                bw.write(getBeltInfo(pNum) + "\n");
+            int qType = sc.nextInt();       // 명령 종류
+            if(qType == 100) {  // 공장 설립
+                buildFactory();
+            } else if(qType == 200) {   // 물건 모두 옮기기
+                move();
+            } else if(qType == 300) {   // 앞 물건만 교체
+                change();
+            } else if(qType == 400) {   // 물건 나누기
+                divide();
+            } else if(qType == 500) {   // 선물 정보 얻기
+                giftScore();
+            } else {    // 벨트 정보 얻기
+                beltScore();
             }
         }
-        bw.flush();
     }
+
 }
