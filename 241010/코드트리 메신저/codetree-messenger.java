@@ -32,20 +32,21 @@ public class Main {
         채팅방 c1, c2의 부모를 교환
     */
     public static void chageParent(int c1, int c2) {
-        changeBaby(c1, c2);
-        changeBaby(c2, c1);
+        int[] c1Baby = getBaby(c1);
+        int[] c2Baby = getBaby(c2);
+        c1Baby[parents[c1]] = c2;
+        c2Baby[parents[c2]] = c1;
         
         int tmp = parents[c1];
         parents[c1] = c2;
         c2 = tmp;
     }
 
-    public static void changeBaby(int c1, int c2) {
-        if(left[parents[c1]] == c1) {    // c1 부모의 왼쪽 자식이 c1이라면
-            left[parents[c1]] = c2;      // c1 부모의 왼쪽 자식을 c2로 바꾸기
-        } else if(right[parents[c1]] == c1) {    // c1 부모의 오른쪽 자식이 c1이라면
-            right[parents[c1]] = c2;     // c1 부모의 오른쪽 자식을 c2로 바꾸기
-        }
+    public static int[] getBaby(int c) {
+        if(left[parents[c]] == c) {    // c 부모의 왼쪽 자식이 c라면
+            return left;
+        } 
+        return right;
     }
 
     /*
