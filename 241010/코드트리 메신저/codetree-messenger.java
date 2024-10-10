@@ -38,8 +38,11 @@ public class Main {
         c2Baby[parents[c2]] = c1;
         
         int tmp = parents[c1];
-        parents[c1] = c2;
-        c2 = tmp;
+        parents[c1] = parents[c2];
+        parents[c2] = tmp;
+
+        //System.out.println(c1 + " " + parents[c1] + " " + left[c1] + " " + right[c1]);
+        //System.out.println(c2 + " " + parents[c2] + " " + left[c2] + " " + right[c2]);
     }
 
     public static int[] getBaby(int c) {
@@ -53,7 +56,7 @@ public class Main {
         알림을 받을 수 있는 채팅방 수 조회
     */
     public static void dfs(int cur, int depth) {
-        if(!isNotification[cur]) {   // 알림이 꺼져있다면
+        if(depth != 0 && !isNotification[cur]) {   // 알림이 꺼져있다면
             return;     // 더이상 아래로 내려가지 않아도 됨
         }  
 
