@@ -29,9 +29,9 @@ public class Main {
     static int k;       // 턴 수
     static int[] direction;   // 도망자의 이동 방향(상하 또는 좌우)
     static int[] dirDetail;     // 상하 타입이면 상 또는 하, 좌우 타입이면 좌 또는 우
-    static Position[] pos;  // 도망자의 위치
-    static int[][] runnerArr;       // 위치에 도망자의 인덱스를 저장
-    static int[][] arr;
+    static List<Integer>[][] seeker;      // 도망자가 바라보는 방향 저장
+    static List<Integer>[][] newSeeker;   // 도망자가 움직였을 때
+    static boolean[][] tree;
     static int answer;      // 술래의 총 점수
     static Position monster;   // 술래
     static List<Direction> snail;    // 술래가 나선형으로 움직였을 때 위치 좌표들
@@ -44,32 +44,13 @@ public class Main {
     // 상우하좌
     final static int[] DX = {-1, 0, 1, 0};
     final static int[] DY = {0, 1, 0, -1};
-    // 상하
-    final static int[] TOP_OR_BOTTOM_DX = {-1, 1};
-    final static int[] TOP_OR_BOTTOM_DY = {0, 0};
-    // 좌우
-    final static int[] LEFT_OR_RIGHT_DX = {0, 0};
-    final static int[] LEFT_OR_RIGHT_DY = {-1, 1};
 
-    public static int manhattanDistance(int idx) {
-        return Math.abs(monster.x - pos[idx].x) + Math.abs(monster.y - pos[idx].y);
+    public static int manhattanDistance(int x, int y) {
+        return Math.abs(monster.x - x) + Math.abs(monster.y - y);
     }
 
     public static boolean isValid(int x, int y) {
         return 0 <= x && x < n && 0 <= y && y < n;
-    }
-
-    public static int[] getNewPosition(int i) {
-        int nx;
-        int ny;
-        if(direction[i] == 1) {     // 좌우 타입
-            nx = pos[i].x + LEFT_OR_RIGHT_DX[dirDetail[i]];
-            ny = pos[i].y + LEFT_OR_RIGHT_DY[dirDetail[i]];
-        } else {        // 상하 타입
-            nx = pos[i].x + TOP_OR_BOTTOM_DX[dirDetail[i]];
-            ny = pos[i].y + TOP_OR_BOTTOM_DY[dirDetail[i]];
-        }
-        return new int[]{nx, ny};
     }
 
     public static void initSnail() {
@@ -128,20 +109,15 @@ public class Main {
     /*
         술래에게 잡혀서 도망자가 죽는다
      */
-    public static boolean kill(int nx, int ny) {
+    public static int kill(int nx, int ny) {
         // 유효하지 않은 위치이거나 나무가 있다면
-        if(!isValid(nx, ny) || arr[nx][ny] == 1) {
-            return false;
+        if(!isValid(nx, ny) || tree[nx][ny] == true) {
+            return 0;
         }
         // 도망자를 찾았다면
-        if(runnerArr[nx][ny] != -1) {
-            int killIdx = runnerArr[nx][ny];
-            runnerArr[nx][ny] = -1;
-            pos[killIdx].x = -1;
-            pos[killIdx].y = -1;
-            return true;
-        }
-        return false;
+        int cnt = seeker[nx][ny].size();
+        seeker[nx][ny].clear();
+        return cnt;
     }
 
     /*
@@ -154,16 +130,12 @@ public class Main {
         int curX = monster.x;
         int curY = monster.y;
 
-        if(kill(curX, curY)) {
-            cnt++;
-        }
+        cnt += kill(curX, curY);
 
         for(int i=0; i<2; i++) {
             int nx = DX[curD] + curX;
             int ny = DY[curD] + curY;
-            if(kill(nx, ny)) {
-                cnt++;
-            }
+            cnt += kill(nx, ny);
             curX = nx;
             curY = ny;
         }
@@ -174,43 +146,49 @@ public class Main {
         도망자가 움직인다
     */
     public static void run() {
-        for(int i=0; i<m; i++) {
-            if(pos[i].x == -1) {      // 잡혔던 도망자는 건너뛰기
-                continue;
+        // 도망자가 움직였을 때 저장하는 리스트 배열 초기화
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                newSeeker[i][j] = new ArrayList();
             }
-            // 움직이지 않아도 되는 도망자라면
-            if(manhattanDistance(i) > 3) {
-                continue;
-            }
-            // 움직이는 타입 구별
-            int[] newPos = getNewPosition(i);
-            int nx = newPos[0];
-            int ny = newPos[1];
+        }
 
-            // 격자를 벗어나지 않는 경우
-            if(isValid(nx, ny)) {
-                // 움직이려는 칸에 술래가 있다면
-                if(monster.x == nx && monster.y == ny) {
-                    continue;
+        for(int i=0; i<n; i++) {        // 행
+            for(int j=0; j<n; j++) {    // 열
+                List<Integer> tmp = seeker[i][j];
+                for(int d : tmp) {
+                    // 움직이지 않아도 되는 도망자라면
+                    if(manhattanDistance(i, j) > 3) {
+                        continue;
+                    }
+                    int nx = DX[d] + i;
+                    int ny = DY[d] + j;
+                    // 격자를 벗어나지 않는 경우
+                    if(isValid(nx, ny)) {
+                        // 움직이려는 칸에 술래가 있다면
+                        if(monster.x == nx && monster.y == ny) {
+                            continue;
+                        }
+                        newSeeker[nx][ny].add(d);
+                    } else {        // 격자를 벗어난 경우
+                        // 반대 방향으로 튼다
+                        int newD = (d + 2) % 4;
+                        nx = i + DX[newD];
+                        ny = j + DY[newD];
+                        // 술래가 있으면
+                        if(monster.x == nx && monster.y == ny) {
+                            continue;
+                        }
+                        newSeeker[nx][ny].add(newD);
+                    }
                 }
-                runnerArr[pos[i].x][pos[i].y] = -1;
-                pos[i].x = nx;
-                pos[i].y = ny;
-                runnerArr[nx][ny] = i;
-            } else {        // 격자를 벗어난 경우
-                // 반대 방향으로 튼다
-                dirDetail[i] = (dirDetail[i] + 1) % 2;
-                newPos = getNewPosition(i);
-                nx = newPos[0];
-                ny = newPos[1];
-                // 술래가 있으면
-                if(monster.x == nx && monster.y == ny) {
-                    continue;
-                }
-                runnerArr[pos[i].x][pos[i].y] = -1;
-                pos[i].x = nx;
-                pos[i].y = ny;
-                runnerArr[nx][ny] = i;
+            }
+        }
+
+        // 기존 리스트 배열 갱신
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                seeker[i][j] = new ArrayList(newSeeker[i][j]);
             }
         }
     }
@@ -230,30 +208,26 @@ public class Main {
         // 도망자의 위치와 이동 방법을 입력 받기
         direction = new int[m];
         dirDetail = new int[m];
-        pos = new Position[m];
-        runnerArr = new int[n][n];
+        seeker = new ArrayList[n][n];
+        newSeeker = new ArrayList[n][n];
         for(int i=0; i<n; i++) {
-            Arrays.fill(runnerArr[i], -1);
+            for(int j=0; j<n; j++) {
+                seeker[i][j] = new ArrayList();
+            }
         }
         for(int i=0; i<m; i++) {
             st = new StringTokenizer(br.readLine());
             int x = Integer.parseInt(st.nextToken()) - 1;
             int y = Integer.parseInt(st.nextToken()) - 1;
-            pos[i] = new Position(x, y);
-            direction[i] = Integer.parseInt(st.nextToken());
-            runnerArr[x][y] = i;        // 위치에 도망자의 인덱스 저장
-            if(direction[i] == 1) {     // 좌우 티입
-                dirDetail[i] = 1;        // 오른쪽으로 초기화
-            } else {
-                dirDetail[i] = 1;        // 아래쪽으로 초기화
-            }
+            int d = Integer.parseInt(st.nextToken());
+            seeker[x][y].add(d);
         }
 
         // 나무의 위치 입력 받기
-        arr = new int[n][n];
+        tree = new boolean[n][n];
         for(int i=0; i<h; i++) {
             st = new StringTokenizer(br.readLine());
-            arr[Integer.parseInt(st.nextToken()) - 1][Integer.parseInt(st.nextToken()) - 1] = 1;
+            tree[Integer.parseInt(st.nextToken()) - 1][Integer.parseInt(st.nextToken()) - 1] = true;
         }
 
         initSnail();
