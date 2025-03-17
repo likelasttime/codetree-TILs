@@ -242,15 +242,15 @@ public class Main {
             // 공격자의 공격
             attack(attacker[0], attacker[1]);
 
-            if(cnt <= 1) {
-                break;
-            }
-
             // 포탑 부서짐
             die();
 
             // 포탑 정비
             upgrade();
+
+            if(cnt <= 1) {
+                break;
+            }
         }
 
         int answer = 0;     // 최대 공격력
