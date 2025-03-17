@@ -230,26 +230,27 @@ public class Main {
 
         die();        // 초반에 공격력이 0인 포탑은 부서진 포탑
 
-        while(k-- > 0) {
+        int curTime = 0;
+        while(curTime++ < k) {
             // 공격자 선정
             isActive = new boolean[n][m];
             int[] attacker = chooseAttacker();
-            lastTime[attacker[0]][attacker[1]] = k;
+            lastTime[attacker[0]][attacker[1]] = curTime;
             isActive[attacker[0]][attacker[1]] = true;
             arr[attacker[0]][attacker[1]] += (n + m);       // 공격력 증가
 
             // 공격자의 공격
             attack(attacker[0], attacker[1]);
 
+            if(cnt <= 1) {
+                break;
+            }
+
             // 포탑 부서짐
             die();
 
             // 포탑 정비
             upgrade();
-
-            if(cnt <= 1) {
-                break;
-            }
         }
 
         int answer = 0;     // 최대 공격력
