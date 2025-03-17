@@ -140,7 +140,8 @@ public class Main {
         for(int d=0; d<8; d++) {
             int nx = (n + target.row + DX[d]) % n;
             int ny = (m + target.col + DY[d]) % m;
-            if(attacker.row == nx && attacker.col == ny) {      // 공격자는 영향을 받지 않는다
+            // 공격자 또는 부서진 포탄이라면
+            if((attacker.row == nx && attacker.col == ny) || isDie[nx][ny]) {
                 continue;
             }
             arr[nx][ny] -= arr[attacker.row][attacker.col] / 2;
@@ -155,12 +156,17 @@ public class Main {
         // 공격자 공격력의 절반 만큼 피해를 입는다
         int x = attacker.row;
         int y = attacker.col;
-        while(x != target.row && y != target.col) {
+        while(!(x == target.row && y == target.col)) {
             for(int d=0; d<4; d++) {
                 int nx = (n + DX[d] + x) % n;
                 int ny = (m + DY[d] + y) % m;
                 if (nx == target.row && ny == target.col) {
+                    x = nx;
+                    y = ny;
                     break;
+                }
+                if(isActive[nx][ny]) {
+                    continue;
                 }
                 if (distance[nx][ny] < distance[x][y]) {
                     arr[nx][ny] -= arr[attacker.row][attacker.col] / 2;
