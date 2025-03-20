@@ -49,6 +49,10 @@ public class Main {
             }
         }
 
+        if(n == 1) {
+            answer = 2;
+        }
+
         System.out.println(answer);       
     }
 }
