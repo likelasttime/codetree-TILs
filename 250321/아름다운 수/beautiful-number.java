@@ -13,8 +13,12 @@ public class Main {
             for(int i=0; i<n; i++) {
                 if(arr[i] == prev) {
                     cntArr[arr[i]]++;
-                } else {
+
+                } else if(cntArr[prev] % prev == 0) {
                     cntArr[arr[i]] = 1;
+                } 
+                else {
+                    return;
                 }
                 prev = arr[i];      // 이전 값 갱신
             }
