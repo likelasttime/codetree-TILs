@@ -8,24 +8,27 @@ public class Main {
     static List<Integer> line;    // 선택한 선분 저장
     static int[][] segments;
 
-    public static boolean isOverlapped(int cur) {
-        int curLeft = segments[cur][0];
-        int curRight = segments[cur][1];
-        for(int idx : line) {
-            //int left = segments[idx][0];
-            //int right = segments[idx][1];
-            // 양끝점이 겹치는 경우
-            if(segments[idx][0] == curLeft || segments[idx][1] == curRight) {
-                return true;
+    public static boolean isOverlapped() {
+        for(int cur : line) {
+            int curLeft = segments[cur][0];
+            int curRight = segments[cur][1];
+            for(int idx : line) {
+                if(cur == idx) {
+                    continue;
+                }
+                // 양끝점이 겹치는 경우
+                if(segments[idx][0] == curLeft || segments[idx][1] == curRight) {
+                    return true;
+                }
+                // 시작점이 다른 선분의 시작점, 끝점보다 클때
+                if(curLeft < segments[idx][0] && curRight < segments[idx][0]) {
+                    continue;
+                }
+                if(curLeft > segments[idx][0] && curLeft > segments[idx][1]) {
+                    continue;
+                }
+                return true;        // 두 선분이 겹치는 경우는 총 4가지
             }
-            // 시작점이 다른 선분의 시작점, 끝점보다 클때
-            if(curLeft < segments[idx][0] && curRight < segments[idx][0]) {
-                continue;
-            }
-            if(curLeft > segments[idx][0] && curLeft > segments[idx][1]) {
-                continue;
-            }
-            return true;        // 두 선분이 겹치는 경우는 총 4가지
         }
         return false;
     }
@@ -35,19 +38,17 @@ public class Main {
     */
     public static void dfs(int depth) {
         if(depth == n) {
-            answer = Math.max(answer, line.size());
+            if(!isOverlapped()) {
+                answer = Math.max(answer, line.size());
+            }
             return;
         }
-        for(int i=depth; i<n; i++) {       // i = 선분 인덱스
-            boolean result = isOverlapped(i);
-            if(result) {        // 선분이 겹치면
-                continue;
-            }
-            line.add(i);
+        //for(int i=depth; i<n; i++) {       // i = 선분 인덱스
+            line.add(depth);
             dfs(depth + 1);
             line.remove(line.size() - 1);
             dfs(depth + 1);
-        }
+        //}
     }
 
     public static void main(String[] args) {
