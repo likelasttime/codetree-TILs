@@ -42,7 +42,7 @@ public class Main {
             }
             line.add(i);
             dfs(depth + 1);
-            line.remove(depth);
+            line.remove(line.size() - 1);
         }
     }
 
