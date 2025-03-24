@@ -33,15 +33,15 @@ public class Main {
     /*
         선분을 선택하는 조합을 바꿔가며 재귀호출
     */
-    public static void dfs(int depth, int cnt) {
-        answer = Math.max(answer, cnt);
+    public static void dfs(int depth) {
+        answer = Math.max(answer, line.size());
         for(int i=depth; i<n; i++) {       // i = 선분 인덱스
             boolean result = isOverlapped(i);
             if(result) {        // 선분이 겹치면
                 continue;
             }
             line.add(i);
-            dfs(depth + 1, cnt + 1);
+            dfs(depth + 1);
             line.remove(depth);
         }
     }
@@ -58,7 +58,7 @@ public class Main {
             segments[i][1] = sc.nextInt();      // 1 ~ 1,000
         }
 
-        dfs(0, 0);
+        dfs(0);
 
         // 겹치지 않게 뽑을 수 있는 최대 선분의 수 출력
         System.out.println(answer);
