@@ -34,7 +34,10 @@ public class Main {
         선분을 선택하는 조합을 바꿔가며 재귀호출
     */
     public static void dfs(int depth) {
-        answer = Math.max(answer, line.size());
+        if(depth == n) {
+            answer = Math.max(answer, line.size());
+            return;
+        }
         for(int i=depth; i<n; i++) {       // i = 선분 인덱스
             boolean result = isOverlapped(i);
             if(result) {        // 선분이 겹치면
@@ -43,6 +46,7 @@ public class Main {
             line.add(i);
             dfs(depth + 1);
             line.remove(line.size() - 1);
+            dfs(depth + 1);
         }
     }
 
