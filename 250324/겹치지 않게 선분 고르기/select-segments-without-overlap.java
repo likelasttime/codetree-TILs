@@ -34,20 +34,20 @@ public class Main {
     }
 
     /*
-        선분을 선택하는 순서를 바꿔가며 재귀호출
+        선분을 선택하는 조합을 바꿔가며 재귀호출
     */
     public static void dfs(int depth, int cnt) {
         if(depth == n) {        // 모든 선분을 골랐으면
             answer = Math.max(answer, cnt);
             return;
         }
-        for(int i=0; i<n; i++) {       // i = 선분 인덱스
+        for(int i=depth; i<n; i++) {       // i = 선분 인덱스
             if(!visit[i]) {     // 아직 선택하지 않은 선분이라면
-                visit[i] = true;
                 boolean result = isOverlapped(i);
                 int cntLine = 0;
                 if(!result) {       // 선분을 그릴 수 있으면
                     cntLine = 1;
+                    visit[i] = true;
                 }
                 dfs(depth + 1, cnt + cntLine);
                 visit[i] = false;
@@ -57,7 +57,7 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        n = sc.nextInt();       
+        n = sc.nextInt();
         segments = new int[n][2];
         answer = 0;
         visit = new boolean[n];
