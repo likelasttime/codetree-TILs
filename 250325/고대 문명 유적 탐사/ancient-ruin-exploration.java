@@ -177,8 +177,7 @@ public class Main {
         rotateArr = arr;
         for(int tc=0; tc<k; tc++) {
             int maxValue = 0;       // 최대 가치
-
-                // 3 * 3 격자 선택
+            // 3 * 3 격자 선택
             int prevD = 4;
                 for (int row = 1; row <= 3; row++) {
                     for (int col = 1; col <= 3; col++) {
@@ -186,18 +185,20 @@ public class Main {
                         for(int i=0; i<3; i++) {        // 90도, 180도, 270도 회전
                             tmp = rotate(tmp, row, col);
                             int result = getMaxValue(tmp, true);
-                            if (result >= maxValue) {     // 최대 가치 갱신
-                                if(prevD > i) {
-                                    maxValue = result;
-                                    rotateArr = tmp;
-                                    center = new Position(row, col);
-                                }
+                            if(result == maxValue && prevD > i) {       // 최대 가치가 같으면 회전 각도가 낮은 방법 선택
+                                maxValue = result;
+                                rotateArr = tmp;
+                                center = new Position(row, col);
                                 prevD = i;
+                            } else if(result > maxValue) {        // 최대 가치가 더 큰쪽 선택
+                                prevD = i;
+                                maxValue = result;
+                                rotateArr = tmp;
+                                center = new Position(row, col);
                             }
                         }
                     }
                 }
-            //}
 
             if(maxValue == 0) {
                 break;
