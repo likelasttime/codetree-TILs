@@ -174,26 +174,30 @@ public class Main {
             treasure[i] = Integer.parseInt(st.nextToken());
         }
 
+        rotateArr = arr;
         for(int tc=0; tc<k; tc++) {
             int maxValue = 0;       // 최대 가치
 
-            
-            for(int i=0; i<3; i++) {        // 90도, 180도, 270도 회전
                 // 3 * 3 격자 선택
+            int prevD = 4;
                 for (int row = 1; row <= 3; row++) {
                     for (int col = 1; col <= 3; col++) {
                         int[][] tmp = copied(arr);
-                        tmp = rotate(tmp, row, col);
-                        int result = getMaxValue(tmp, true);
-                        if (result > maxValue) {     // 최대 가치 갱신
-                            maxValue = result;
-                            rotateArr = tmp;
-                            center = new Position(row, col);
+                        for(int i=0; i<3; i++) {        // 90도, 180도, 270도 회전
+                            tmp = rotate(tmp, row, col);
+                            int result = getMaxValue(tmp, true);
+                            if (result >= maxValue) {     // 최대 가치 갱신
+                                if(prevD > i) {
+                                    maxValue = result;
+                                    rotateArr = tmp;
+                                    center = new Position(row, col);
+                                }
+                                prevD = i;
+                            }
                         }
                     }
                 }
-            }
-
+            //}
 
             if(maxValue == 0) {
                 break;
