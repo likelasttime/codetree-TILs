@@ -195,7 +195,7 @@ public class Main {
     */
     public static void sendBelief(PriorityQueue<Person> pq) {
         Person leader = pq.poll();      // 그룹의 대표자
-        leaderPq.offer(new Leader(leader.row, leader.col, foodArr[leader.row][leader.col].length(), b[leader.row][leader.col]));
+        leaderPq.offer(new Leader(leader.row, leader.col, foodArr[leader.row][leader.col].length(), b[leader.row][leader.col] + pq.size() - 1));
         while(!pq.isEmpty()) {
             Person person = pq.poll();
             b[leader.row][leader.col]++;        // 대표자에게 신앙심 넘기기
