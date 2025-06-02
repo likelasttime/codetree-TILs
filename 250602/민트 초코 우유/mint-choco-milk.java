@@ -27,16 +27,27 @@ public class Main {
         int row;        // 행
         int col;        // 열
         int len;        // 신봉 음식 길이
+        int belief;     // 신앙심
 
-        Leader(int row, int col, int len) {
+        Leader(int row, int col, int len, int belief) {
             this.row = row;
             this.col = col;
             this.len = len;
+            this.belief = belief;
         }
 
         @Override
         public int compareTo(Leader leader) {
-            return this.len - leader.len;       // 오름차순
+            if(this.len != leader.len) {
+                return this.len - leader.len;       // 오름차순
+            }
+            if(this.belief != leader.belief) {
+                return leader.belief - this.belief;        // 신앙심이 높은 순
+            }
+            if(this.row != leader.row) {
+                return this.row - leader.row;       // 행이 작은 순
+            }
+            return this.col - leader.col;       // 열이 작은 순
         }
     }
 
@@ -121,7 +132,7 @@ public class Main {
             int nx = (DX[dir] * cnt) + row;
             int ny = (DY[dir] * cnt) + col;
             // 격자 밖으로 나가거나 간절함이 다떨어지면
-            if(!isValid(nx, ny) || hp == 0) {
+            if(!isValid(nx, ny) || hp <= 0) {
                 return;
             }
             // 전파 대상의 신봉 음식과 전파자의 신봉 음식이 같으면
@@ -146,17 +157,34 @@ public class Main {
         }
     }
 
+    public static int getFoodIndex(char ch) {
+        switch (ch) {
+            case 'T':
+                return 0;
+            case 'M':
+                return 1;
+        }
+        return 2;       // C
+    }
+
     /*
         기존에 관심을 가지던 기본 음식들과 전파자가 관심을 가지고 있는 기본 음식 모두 합친 음식을 반환
     */
     public static String getNewFood(String original, String bonus) {
-        if((original.equals("M") && bonus.equals("C")) || (original.equals("C") && bonus.equals("M"))) {
+        boolean[] checkFood = new boolean[3];
+        for(int i=0; i<original.length(); i++) {
+            checkFood[getFoodIndex(original.charAt(i))] = true;
+        }
+        for(int i=0; i<bonus.length(); i++) {
+            checkFood[getFoodIndex(bonus.charAt(i))] = true;
+        }
+        if(!checkFood[0] && checkFood[1] && checkFood[2]) {
             return "CM";
         }
-        if((original.equals("T") && bonus.equals("C")) || (original.equals("C") && bonus.equals("T"))) {
+        if(checkFood[0] && checkFood[2] && !checkFood[1]) {
             return "TC";
         }
-        if((original.equals("T") && bonus.equals("M")) || (original.equals("M") && bonus.equals("T"))) {
+        if(checkFood[0] && checkFood[1] && !checkFood[2]) {
             return "TM";
         }
         return "TCM";
@@ -167,7 +195,7 @@ public class Main {
     */
     public static void sendBelief(PriorityQueue<Person> pq) {
         Person leader = pq.poll();      // 그룹의 대표자
-        leaderPq.offer(new Leader(leader.row, leader.col, foodArr[leader.row][leader.col].length()));
+        leaderPq.offer(new Leader(leader.row, leader.col, foodArr[leader.row][leader.col].length(), b[leader.row][leader.col]));
         while(!pq.isEmpty()) {
             Person person = pq.poll();
             b[leader.row][leader.col]++;        // 대표자에게 신앙심 넘기기
