@@ -49,7 +49,7 @@ public class Main {
         for(int x=startX; x<endX; x++) {        // 행
             for(int y=startY; y<endY; y++) {    // 열
                 if(arr[x][y] == 1) {        // 함정이 있으면
-                    person.hp--;        // 체력 감소
+                    personArr[num].hp--;        // 체력 감소
                     damageArr[num]++;       // 받은 데미지 증가
                 }
             }
