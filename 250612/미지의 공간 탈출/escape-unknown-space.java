@@ -177,32 +177,32 @@ public class Main {
         for(int i=0; i<m; i++) {
             int topId = idTimeWall[TOP][i][m - 1];
             int eastId = idTimeWall[EAST][0][m - 1 - i];
-            graph[topId][EAST] = eastId;
-            graph[eastId][NORTH] = topId;
+            graph[topId][0] = eastId;
+            graph[eastId][3] = topId;
         }
 
         // 시간의 벽 위쪽과 남쪽 단면도의 인접한 셀 연결
         for(int i=0; i<m; i++) {
             int topId = idTimeWall[TOP][m - 1][i];
             int southId = idTimeWall[SOUTH][0][i];
-            graph[topId][SOUTH] = southId;
-            graph[southId][NORTH] = topId;
+            graph[topId][1] = southId;
+            graph[southId][3] = topId;
         }
 
         // 시간의 벽 위쪽과 서쪽 단면도의 인접한 셀 연결
         for(int i=0; i<m; i++) {
             int topId = idTimeWall[TOP][0][i];
             int westId = idTimeWall[WEST][0][i];
-            graph[topId][WEST] = westId;
-            graph[westId][NORTH] = topId;
+            graph[topId][2] = westId;
+            graph[westId][3] = topId;
         }
 
         // 시간의 벽 위쪽과 북쪽 단면도의 인접한 셀 연결
         for(int i=0; i<m; i++) {
             int topId = idTimeWall[TOP][0][i];
             int northId = idTimeWall[NORTH][0][m - 1- i];
-            graph[topId][NORTH] = northId;
-            graph[northId][NORTH] = topId;
+            graph[topId][3] = northId;
+            graph[northId][3] = topId;
         }
 
         // 평면도와 동쪽 단면도의 인접한 셀 연결
@@ -210,8 +210,8 @@ public class Main {
             for(int i=0; i<m; i++) {
                 int timeWallId = idTimeWall[EAST][m - 1][i];
                 int arrId = idArr[timeWallStartPos.x + (m - 1) - i][timeWallStartPos.y + m];
-                graph[timeWallId][SOUTH] = arrId;
-                graph[arrId][WEST] = timeWallId;
+                graph[timeWallId][1] = arrId;
+                graph[arrId][2] = timeWallId;
             }
         }
 
@@ -220,8 +220,8 @@ public class Main {
             for(int i=0; i<m; i++) {
                 int timeWallId = idTimeWall[SOUTH][m - 1][i];
                 int arrId = idArr[timeWallStartPos.x + m][timeWallStartPos.y + i];
-                graph[timeWallId][SOUTH] = arrId;
-                graph[arrId][NORTH] = timeWallId;
+                graph[timeWallId][1] = arrId;
+                graph[arrId][3] = timeWallId;
             }
         }
 
@@ -230,8 +230,8 @@ public class Main {
             for(int i=0; i<m; i++) {
                 int timeWallId = idTimeWall[WEST][m - 1][i];
                 int arrId = idArr[timeWallStartPos.x + i][timeWallStartPos.y - 1];
-                graph[timeWallId][SOUTH] = arrId;
-                graph[arrId][EAST] = timeWallId;
+                graph[timeWallId][1] = arrId;
+                graph[arrId][0] = timeWallId;
             }
         }
 
@@ -240,8 +240,8 @@ public class Main {
             for(int i=0; i<m; i++) {
                 int timeWallId = idTimeWall[NORTH][m - 1][i];
                 int arrId = idArr[timeWallStartPos.x - 1][timeWallStartPos.y + (m - 1) - i];
-                graph[timeWallId][SOUTH] = arrId;
-                graph[arrId][SOUTH] = timeWallId;
+                graph[timeWallId][1] = arrId;
+                graph[arrId][1] = timeWallId;
             }
         }
     }
